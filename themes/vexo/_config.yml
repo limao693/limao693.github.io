@@ -1,0 +1,61 @@
+author: Charles
+description: Charles's blog
+keyword: hexo-theme, vuejs
+favicon: 
+
+excerpt_link: Read more
+
+menu:
+ Home: /
+ Tags: /tags/
+ Archives: /archives/
+ Projects: /project/
+ About: /about/
+
+# highlight
+highlight:
+  tomorrow
+
+# catalog
+catalog: true
+
+# donate
+donate: false
+
+# qrcode
+qrcode: true
+
+# comment
+# you can set gitment, uyan or disqus
+
+comment: gitment
+
+# gitment config
+gitment_owner: charles
+gitment_repo: limao693.github.io
+gitment_oauth_id: 06845d87a51ec51e16f4
+gitment_oauth_secret: 4c9110bcff722e4232de8e654b4574360acc46cd
+
+# uyan config
+# if you want to use uyan as your blog comment, plz remove/comment out gitment config
+baidu_id: 
+
+# disqus config
+disqus_shortname: 
+
+about: 
+  banner: http://file.muyutech.com/about.jpg
+  avatar: http://wx2.sinaimg.cn/mw690/4ad098a8ly8fmxmpx357kj20u00u076z.jpg
+  description: "The end is always near."
+  weibo_username: 1005051255184552
+#  twitter_username: limao693
+  github_username: limao693
+#  zhihu_username: yummy1121
+#  douban_username: yanm1ng
+#  linkedin_username:
+
+# MathJax Support
+mathjax:
+  enable: true
+  per_page: false
+  cdn: //cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML
