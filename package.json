@@ -16,5 +16,21 @@
     "hexo-renderer-marked": "^0.3.2",
     "hexo-renderer-stylus": "^0.3.3",
     "hexo-server": "^0.3.1"
+  },
+  "yuqueConfig": {
+    "baseUrl": "https://www.yuque.com/api/v2",
+    "login": "mugongbuxiangshuohua",
+    "repo": "vmegx2",
+    "mdNameFormat": "title",
+    "postPath": "source/_posts/yuque"
+  },
+  "scripts": {
+    "sync": "yuque-hexo sync",
+    "clean:yuque": "yuque-hexo clean",
+    "deploy": "npm run sync && hexo clean && hexo g -d",
+    "dev": "hexo clean && hexo server"
+  },
+  "devDependencies": {
+    "yuque-hexo": "^1.3.1"
   }
 }
