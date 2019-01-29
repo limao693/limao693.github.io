@@ -22,7 +22,7 @@ install:
 - yarn
 script:
 - yuque-hexo sync
-- yuque-hexo clean
+#- yuque-hexo clean
 - hexo clean
 - hexo generate
 after_success:
