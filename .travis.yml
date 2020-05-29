@@ -44,7 +44,7 @@ after_success:
 notifications:
   webhooks:
     urls:
-     - https://sc.ftqq.com/$SERVER_JIANG.send?text=主人又触发完成了~
+     - https://sc.ftqq.com/$SERVER_JIANG.send?text=主人又触成了~
     on_success: always # default: always
     on_failure: always # default: always
     on_start:   always # default: never
