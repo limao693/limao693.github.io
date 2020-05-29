@@ -5,11 +5,11 @@
 # Site
 title: 万物并作，吾以观复
 subtitle:
-description:
+description: 私人空间
 keywords:
 author: Charles li
-language:
-timezone:
+language: zh-CN
+timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
