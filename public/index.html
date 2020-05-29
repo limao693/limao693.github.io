@@ -141,60 +141,234 @@
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2019/01/15/Git与Gerrit使用小结/">Git与Gerrit使用小结</a>
+        <a href="/2020/05/26/python协程gevent/">python协程gevent</a>
       </h2>
-      <p class="article-date">January 15, 2019</p>
+      <p class="article-date">May 26, 2020</p>
       
       <div class="article-summary">
         
-          [TOC]
-切换分支报错，提示需要删除差异文件git clean  -d  -fx “”注： 
-
-x ：表示删除忽略文件已经对git来说不识别的文件 
-d: 删除未被添加到git的路径中的文件 
-f: 强制执行
-
-git status提示.idea未同步。Since you are loca ...
+          协程由于 python 解释器使用全局解释器锁（Global Interpreter Lock，GIL），设计锁是为了同步线程。能够确保任一时刻，仅有一个线程真正的在工作。所以为了能够实现多线程工作，引出了协程（Coroutine）。协程作为一种计算机程序组件，能够允许挂起和恢复执行来概括非 ...
         
       </div>
-      <a class="more" href="/2019/01/15/Git与Gerrit使用小结/">Read more</a>
+      <a class="more" href="/2020/05/26/python协程gevent/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2019/01/14/hello-world/">Hello World</a>
+        <a href="/2020/01/08/Docker基础知识--Cgroup/">Docker基础知识--Cgroup</a>
       </h2>
-      <p class="article-date">January 14, 2019</p>
+      <p class="article-date">January 8, 2020</p>
+      
+        
+  <a href="/tags#docker">
+    <span class="tag-code">docker</span>
+  </a>
+
+  <a href="/tags#Cgroup">
+    <span class="tag-code">Cgroup</span>
+  </a>
+
       
       <div class="article-summary">
         
-          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer ...
+          前言上篇中，已经讨论了 Docker 作为虚拟化技术，所采用的基础技术 namespace，以此来进行资源隔离。同时，我们也想到了另外一个问题，在资源隔离后，实际上仍然是占用 host 的资源，如何保证资源（CPU、内存和 IO）被有效的控制，为此 Docker 引入另外一项关键技术—Con ...
         
       </div>
-      <a class="more" href="/2019/01/14/hello-world/">Read more</a>
+      <a class="more" href="/2020/01/08/Docker基础知识--Cgroup/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2019/01/04/搭建hexo博客，Netlify持续集成/">搭建hexo博客，Netlify持续集成</a>
+        <a href="/2020/01/08/yuque/Docker基础知识--Cgroup/">Docker基础知识--Cgroup</a>
       </h2>
-      <p class="article-date">January 4, 2019</p>
+      <p class="article-date">January 8, 2020</p>
+      
+        
+  <a href="/tags#docker">
+    <span class="tag-code">docker</span>
+  </a>
+
+  <a href="/tags#Cgroup">
+    <span class="tag-code">Cgroup</span>
+  </a>
+
       
       <div class="article-summary">
         
-          [TOC]
-基于macOs搭建
-# 建立远程仓库
-\1. 建立以个人github域名为名的软件仓库，例如abc.github.com，则建立abc.github.io的软件仓库。
-\2. 在软件仓库中，setting设置个人域名为abc.github.io。
-# 本地准备
-安装git，hom ...
+          
+前言上篇中，已经讨论了Docker作为虚拟化技术，所采用的基础技术namespace，以此来进行资源隔离。同时，我们也想到了另外一个问题，在资源隔离后，实际上仍然是占用host的资源，如何保证资源（CPU、内存和IO）被有效的控制，为此Docker引入另外一项关键技术—Control gr ...
         
       </div>
-      <a class="more" href="/2019/01/04/搭建hexo博客，Netlify持续集成/">Read more</a>
+      <a class="more" href="/2020/01/08/yuque/Docker基础知识--Cgroup/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2019/12/18/Docker基础原理--namespace（pid与network）/">Docker基础原理--namespace（pid与network）</a>
+      </h2>
+      <p class="article-date">December 18, 2019</p>
+      
+        
+  <a href="/tags#docker">
+    <span class="tag-code">docker</span>
+  </a>
+
+  <a href="/tags#namespace">
+    <span class="tag-code">namespace</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          前言在计算机系统中为了标识不同的作用域，而引入 namespace（命名空间）的概念。namespace 作用在内核级别的隔离，可以有效阻止不同进程间的通信。在日常的 Linux 系统中，通常服务在启动后的进程，彼此之间不会特意进行隔离，例如 Web 服务器中，Nginx、MySQL 和 r ...
+        
+      </div>
+      <a class="more" href="/2019/12/18/Docker基础原理--namespace（pid与network）/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2019/12/18/yuque/Docker基础原理--namespace（pid与network）/">Docker基础原理--namespace（pid与network）</a>
+      </h2>
+      <p class="article-date">December 18, 2019</p>
+      
+        
+  <a href="/tags#docker">
+    <span class="tag-code">docker</span>
+  </a>
+
+  <a href="/tags#namespace">
+    <span class="tag-code">namespace</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+前言在计算机系统中为了标识不同的作用域，而引入namespace（命名空间）的概念。namespace作用在内核级别的隔离，可以有效阻止不同进程间的通信。在日常的Linux系统中，通常服务在启动后的进程，彼此之间不会特意进行隔离，例如Web服务器中，Nginx、MySQL和rides，三个 ...
+        
+      </div>
+      <a class="more" href="/2019/12/18/yuque/Docker基础原理--namespace（pid与network）/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2019/09/04/Go语言的sync模块/">Go语言的sync模块</a>
+      </h2>
+      <p class="article-date">September 4, 2019</p>
+      
+      <div class="article-summary">
+        
+          在程序进行并发操作时，当不同线程使用同一变量时，由于无法判断是否有其他线程在进行写操作，即线程之间出现竞争（资源竞争），因此引入锁机制。Go 语言使用 sync 模块保证线程在操作变量的互斥性。当变量被一个线程操作时，先使用 sync 将变量上锁，退出操作时，解锁。sync 模块提供基础的同 ...
+        
+      </div>
+      <a class="more" href="/2019/09/04/Go语言的sync模块/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2019/09/04/yuque/Go语言的sync模块/">Go语言的sync模块</a>
+      </h2>
+      <p class="article-date">September 4, 2019</p>
+      
+      <div class="article-summary">
+        
+          在程序进行并发操作时，当不同线程使用同一变量时，由于无法判断是否有其他线程在进行写操作，即线程之间出现竞争（资源竞争），因此引入锁机制。Go语言使用sync模块保证线程在操作变量的互斥性。当变量被一个线程操作时，先使用sync将变量上锁，退出操作时，解锁。sync 模块提供基础的同步原语，例 ...
+        
+      </div>
+      <a class="more" href="/2019/09/04/yuque/Go语言的sync模块/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2019/06/03/RPC调用/">RPC调用</a>
+      </h2>
+      <p class="article-date">June 3, 2019</p>
+      
+        
+  <a href="/tags#rpc">
+    <span class="tag-code">rpc</span>
+  </a>
+
+  <a href="/tags#HTTP">
+    <span class="tag-code">HTTP</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          知识点Targetan RPC Server’s target:       topic and server is required; exchange is optionalan RPC endpoint’s target:       namespace and version is  ...
+        
+      </div>
+      <a class="more" href="/2019/06/03/RPC调用/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2019/06/03/yuque/RPC调用/">RPC调用</a>
+      </h2>
+      <p class="article-date">June 3, 2019</p>
+      
+        
+  <a href="/tags#rpc">
+    <span class="tag-code">rpc</span>
+  </a>
+
+  <a href="/tags#HTTP">
+    <span class="tag-code">HTTP</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+知识点
+Targetan RPC Server’s target:       topic and server is required; exchange is optionalan RPC endpoint’s target:       namespace and version i ...
+        
+      </div>
+      <a class="more" href="/2019/06/03/yuque/RPC调用/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2019/03/03/usb接口键盘转PS2接口/">usb接口键盘转PS2接口</a>
+      </h2>
+      <p class="article-date">March 3, 2019</p>
+      
+        
+  <a href="/tags#Arduino">
+    <span class="tag-code">Arduino</span>
+  </a>
+
+  <a href="/tags#硬件">
+    <span class="tag-code">硬件</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          用途公司或者主机设备没有 usb 接口，只能使用 PS/2 接口键盘。此程序完成 USB HID keyboard 协议向 PS/2 的 scan code set 2 转换。
+需要的硬件设备
+arduino uno R3
+USB Host Shield
+
+使用说明
+默认 PS/2 接口的的 ...
+        
+      </div>
+      <a class="more" href="/2019/03/03/usb接口键盘转PS2接口/">Read more</a>
     </article>
   
 
+  
+    <div class="guide-pager">
+  
+    <a class="unvisible" href="/"><span class="page-arrow">←</span> Prev</a>
+  
+  
+    <a href="/page/2/">Next<span class="page-arrow"> →</span></a>
+  
+</div>
   
 </main>
 
@@ -204,7 +378,7 @@ git status提示.idea未同步。Since you are loca ...
 </div>
     <footer class="app-footer">
   <p class="copyright">
-    &copy; 2019 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    &copy; 2020 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
     <br>
     Theme by <a href="https://github.com/yanm1ng">yanm1ng</a>
   </p>
