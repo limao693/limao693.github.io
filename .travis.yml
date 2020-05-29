@@ -33,7 +33,7 @@ after_success:
 - cd ./public
 - git init
 - git add --all .
-- git commit -m "Travis CI Auto Builder at `date +"% Y-% m-% d % H:% M"`"
+- git commit -m "a Travis CI Auto Builder at `date +"% Y-% m-% d % H:% M"`"
 # 这里的 REPO_TOKEN 即之前在 travis 项目的环境变量里添加的
 - git push --quiet --force https://$REPO_TOKEN@github.com/limao693/limao693.github.io.git master
 
