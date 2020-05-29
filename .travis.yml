@@ -41,4 +41,12 @@ after_success:
 # 这里的 REPO_TOKEN 即之前在 travis 项目的环境变量里添加的
 - git push --quiet --force https://$REPO_TOKEN@github.com/limao693/limao693.github.io.git master
 
-https://sc.ftqq.com/$SERVER_JIANG.send?text=主人又触发完成了~
+notifications:
+  webhooks:
+    urls:
+     - https://sc.ftqq.com/$SERVER_JIANG.send?text=主人又触发完成了~
+    on_success: change # default: always
+    on_failure: always # default: always
+    on_start:   change # default: never
+    on_cancel:  always # default: always
+    on_error:   always # default: always
