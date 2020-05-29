@@ -17,6 +17,10 @@ before_install:
 - export PATH=$HOME/.yarn/bin:$PATH
 - npm install -g hexo-cli
 - npm i --save-dev yuque-hexo
+
+#add hexo-vexo themes
+- git clone https://github.com/yanm1ng/hexo-theme-vexo.git themes/vexo
+- cp -R themes/vexo/_source/* source/
 install:
 # 不用yarn的话这里改成 npm i 即可
 - yarn
