@@ -28,7 +28,7 @@ script:
 - git commit -m "update RAW markdown files"
 - git push --quiet --force https://$REPO_TOKEN@github.com/limao693/limao693.github.io.git hexo
 
-- hexo generate
+- hexo generate --debug
 after_success:
 - cd ./public
 - git init
