@@ -28,7 +28,7 @@ script:
 - yuque-hexo clean
 - yuque-hexo sync
 - hexo clean
-- git add ./source/_posts/
+- git add ./source/_posts/yuque/
 - git commit -m "update RAW markdown files"
 - git push --quiet --force https://$REPO_TOKEN@github.com/limao693/limao693.github.io.git hexo
 
