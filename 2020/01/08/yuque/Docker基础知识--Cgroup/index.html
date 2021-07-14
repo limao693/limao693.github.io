@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="私人空间">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      Docker基础知识--Cgroup | 万物并作，吾以观复
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  <script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png">
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>万物并作，吾以观复</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>Docker基础知识--Cgroup</h2>
+  <p class="post-date">2020-01-08</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>上篇中，已经讨论了 Docker 作为虚拟化技术，所采用的基础技术 namespace，以此来进行资源隔离。同时，我们也想到了另外一个问题，在资源隔离后，实际上仍然是占用 host 的资源，如何保证资源（CPU、内存和 IO）被有效的控制，为此 Docker 引入另外一项关键技术—Control group ( <code>Cgroup</code>)。</p>
+<h2 id="何为-Cgroup"><a href="#何为-Cgroup" class="headerlink" title="何为 Cgroup"></a>何为 Cgroup</h2><p>在 Linux 系统中，内核本身的调度和管理并不对进程和线程进行区分，只会根据<code>clone</code>创建时传入的值不同，来区分进程和线程。<br>Cgroup 全称为 <code>control grup</code> ，由 06 年合入 linux 内核，就是把任务放在一个组里进行控制。我们给出官方的定义：<br>cgroup 是 Linux 内核提供的一种机制，这种机制可以根据需要把一系列的系统任务和对应的子任务整合（或者分割）到资源划分等级的不同组内。从而对系统的资源，提供了一个完整的控制框架。</p>
+<h2 id="Cgroup-的四个特点"><a href="#Cgroup-的四个特点" class="headerlink" title="Cgroup 的四个特点"></a>Cgroup 的四个特点</h2><ol>
+<li>cgroup 的 API 以仿文件系统的方式实现，用户态的进程可以通过管理文件的方式完成组织管理</li>
+<li>cgroup 的组织管理，最小颗粒度为线程级别，此外用户有权限创建和销毁 cgroup，从而实现资源再分配</li>
+<li>所有的资源管理的功能都以<strong>子系统</strong>的方式实现，保证 API 接口的统一性</li>
+<li>所有子系统的资源组与父任务相同</li>
+</ol>
+<p>所有我们，可以认为，cgroup 是附加在程序上的钩子（hook），通过程序运行时，对资源进行调度触发钩子达到资源监控和控制。</p>
+<h2 id="Cgroup-原理"><a href="#Cgroup-原理" class="headerlink" title="Cgroup 原理"></a>Cgroup 原理</h2><p>在介绍 Cgroup 原理之前，我们先熟悉两个概念：组织结构与基本规则、子系统。</p>
+<h3 id="Cgroup-的组织结构"><a href="#Cgroup-的组织结构" class="headerlink" title="Cgroup 的组织结构"></a>Cgroup 的组织结构</h3><p>传统的 Unix 体系中，首先启动 init 的进程作为 root 进程，再由 init 进程扩展创建子系统作为子节点，而每个子节点又重复此方式，往复循序。而 Cgroup 也创建类似树状结构，子节点继承自父节点。<br>与传统 init 方式不同，cgroup 运行多个父节点，即 cgroup 子节点对应的父节点可以有多个。在 Docker 中每个子系统独自构成一个层级，便于管理。</p>
+<h4 id="Cgroup-的组织规则"><a href="#Cgroup-的组织规则" class="headerlink" title="Cgroup 的组织规则"></a>Cgroup 的组织规则</h4><ol>
+<li>同一个层级可以附加多个子系统</li>
+<li>一个子系统可以附加到多个层级，但前提是，关联的层级仅能与此子系统相连，即当且仅当目标层级只有唯一一个子系统时。</li>
+<li>系统每次创建一个新的层级，该系统上所有任务默认加入这个新建层级的初始化层级，即 <code>root cgroup</code> 。任务在同一层级，仅能有一份。</li>
+<li>任务在 <code>fork/clone</code>  自身时，创建的子任务默认与原任务在同一层级（cgroup）中，但子任务运行被移动到不同个的 cgroup 中。</li>
+</ol>
+<h3 id="子系统介绍"><a href="#子系统介绍" class="headerlink" title="子系统介绍"></a>子系统介绍</h3><p>blkio –  这个子系统为块设备设定输入/输出限制，比如物理设备（磁盘，固态硬盘，USB  等等）。<br>cpu –  这个子系统使用调度程序提供对  CPU  的  cgroup  任务访问。<br>cpuacct –  这个子系统自动生成  cgroup  中任务所使用的  CPU  报告。<br>cpuset –  这个子系统为  cgroup  中的任务分配独立  CPU（在多核系统）和内存节点。<br>devices –  这个子系统可允许或者拒绝  cgroup  中的任务访问设备。<br>freezer –  这个子系统挂起或者恢复  cgroup  中的任务。<br>memory –  这个子系统设定  cgroup  中任务使用的内存限制，并自动生成由那些任务使用的内存资源报告。<br>net_cls –  这个子系统使用等级识别符（classid）标记网络数据包，可允许  Linux  流量控制程序（tc）识别从具体  cgroup  中生成的数据包。<br>ns –  名称空间子系统。</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#docker" >
+    <span class="tag-code">docker</span>
+  </a>
+
+  <a href="/tags#Cgroup" >
+    <span class="tag-code">Cgroup</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2019/12/18/yuque/Docker基础原理--namespace（pid与network）/">
+        <span class="nav-arrow">← </span>
+        
+          Docker基础原理--namespace（pid与network）
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2020/05/26/yuque/python协程gevent/">
+        
+          python协程gevent
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#前言"><span class="toc-nav-text">前言</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#何为-Cgroup"><span class="toc-nav-text">何为 Cgroup</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Cgroup-的四个特点"><span class="toc-nav-text">Cgroup 的四个特点</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Cgroup-原理"><span class="toc-nav-text">Cgroup 原理</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Cgroup-的组织结构"><span class="toc-nav-text">Cgroup 的组织结构</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#Cgroup-的组织规则"><span class="toc-nav-text">Cgroup 的组织规则</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#子系统介绍"><span class="toc-nav-text">子系统介绍</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2020/01/08/yuque/Docker基础知识--Cgroup/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "charles";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "Docker基础知识--Cgroup",
+        owner: "charles",
+        repo: "limao693.github.io",
+        oauth: {
+          client_id: "06845d87a51ec51e16f4",
+          client_secret: "4c9110bcff722e4232de8e654b4574360acc46cd"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+<script>
+  var disqus_shortname = '';
+  
+  var disqus_url = 'http://yoursite.com/2020/01/08/yuque/Docker基础知识--Cgroup/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2021 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+    Theme by <a href="https://github.com/yanm1ng">yanm1ng</a>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+  </body>
+</html>

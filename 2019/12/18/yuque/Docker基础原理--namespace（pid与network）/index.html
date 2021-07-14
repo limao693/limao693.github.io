@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="私人空间">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      Docker基础原理--namespace（pid与network） | 万物并作，吾以观复
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  <script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png">
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>万物并作，吾以观复</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>Docker基础原理--namespace（pid与network）</h2>
+  <p class="post-date">2019-12-18</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在计算机系统中为了标识不同的作用域，而引入 namespace（命名空间）的概念。namespace 作用在内核级别的隔离，可以有效阻止不同进程间的通信。在日常的 Linux 系统中，通常服务在启动后的进程，彼此之间不会特意进行隔离，例如 Web 服务器中，Nginx、MySQL 和 rides，三个服务之间亦可访问任意主机中的文件。如果任一服务不慎被攻破，会被入侵其他的服务。因而 namespace 的引入，可以有效防止不同服务或进程间的相互干扰。<br>Docker 使用 Linux 的 namespace 技术，对实现的容器，做了多种层次的隔离。Docker 所使用的七种 namespace 如下：<code>CLONE_NEWCGROUP</code>、<code>CLONE_NEWIPC</code>、<code>CLONE_NEWNET</code>、<code>CLONE_NEWNS</code>、<code>CLONE_NEWPID</code>、<code>CLONE_NEWUSER</code>  和  <code>CLONE_NEWUTS</code>。通过在进程中添加如上属性，便能保证与宿主机的对应资源进行有效隔离。</p>
+<h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><p>在分时操作系统中，进程作为程序的基本执行单元，也是资源（CPU、内存）分配的基本单位。当服务、程序启动后，操作系统为其开辟一个进程，并为它分配资源，除等待 CPU 资源，其他资源以及就绪，此时进入到<strong>就绪态。</strong>当时间片分割的进程，在高优先级调度队列被调度后，进程开始运行。<br>进程的三种状态：就绪态、运行态和阻断状态。<br>Linux 的进程，可以通过<code>ps -elf</code>命令进行查看，下图为 Centos 系统的截图：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ps -ef</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root         1     0  0 9月24 ?       00:01:32 /usr/lib/systemd/systemd --switched-root --system --deserialize 22</span><br><span class="line">root         2     0  0 9月24 ?       00:00:00 [kthreadd]</span><br><span class="line">root         3     2  0 9月24 ?       00:00:00 [rcu_gp]</span><br><span class="line">root         4     2  0 9月24 ?       00:00:00 [rcu_par_gp]</span><br></pre></td></tr></table></figure>
+<p>当前机器中，运行着很多进程，但都以一个 1 号进程开始，即 pid=1 的进程 init。此进程作为所以后续进程的父进程。例如 pid=39 的进程，其父进程（PPID=1）。</p>
+<ul>
+<li>pid=0 号进程 idle，其前身是系统创建的第一个进程，也是唯一一个没有通过 fork 或者 kernel_thread 产生的进程。完成加载系统后，演变为进程调度、交换</li>
+<li>pid=1 号进程 init，负责执行内核的初始化工作和系统配置。</li>
+<li>pid=2 的 kthreadd 进程，始终运行在内核空间, 负责所有内核线程的调度和管理。</li>
+</ul>
+<h2 id="Docker-容器内进程-PID"><a href="#Docker-容器内进程-PID" class="headerlink" title="Docker 容器内进程 PID"></a>Docker 容器内进程 PID</h2><p>以 RabbitMQ 容器为例，通过如下命令进入 rabbitmq 容器后，使用 ps -ef 命令，再次查看容器内的进程，可以与上面的系统进程进行比较。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@li1559-144 ~]<span class="comment"># docker exec -it 28b6862b34a9 bash</span></span><br><span class="line">root@28b6862b34a9:/<span class="comment"># ps -ef</span></span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">rabbitmq     1     0  0 16:07 ?        00:00:00 /bin/sh /opt/rabbitmq/sbin/rabbitmq-server</span><br><span class="line">rabbitmq   138     1  0 16:07 ?        00:00:00 /usr/<span class="built_in">local</span>/lib/erlang/erts-10.4.4/bin/epmd -daemon</span><br></pre></td></tr></table></figure>
+<p>当前容器内，PID=1 的进程为 rabbitmq-server，与 Linux 的宿主机的 PID=1 的 init 进程不同。此时，容器内的进程以及与宿主机完全隔离。<br>宿主机与 rabbitmq 容器之间的进程对应关系，如下所示（摘自@Draveness）：<br><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1576771885943-5e1c23b8-82e6-43ee-bb68-1f9ef836e98d.png#align=left&amp;display=inline&amp;height=260&amp;name=image.png&amp;originHeight=520&amp;originWidth=1200&amp;size=83888&amp;status=done&amp;style=none&amp;width=600" alt="image.png"><br>因此容器内的进程，对宿主机的进程一无所知。实现了内核级的隔离。</p>
+<p>Docker 在使用上述隔离技术，进行资源的隔离。当我们每次运行 <code>docker run</code>  或者 <code>docker start</code>  时，都会调用以下代码块（moby:<a href="https://github.com/moby" target="_blank" rel="noopener">https://github.com/moby</a>），创建资源隔离的容器：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(daemon *Daemon)</span> <span class="title">createSpec</span><span class="params">(c *container.Container)</span> <span class="params">(retSpec *specs.Spec, err error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		opts []coci.SpecOpts</span><br><span class="line">		s    = oci.DefaultSpec()</span><br><span class="line">	)</span><br><span class="line">	opts = <span class="built_in">append</span>(opts,</span><br><span class="line">		WithCommonOptions(daemon, c),</span><br><span class="line">		WithCgroups(daemon, c),	<span class="comment">//添加Cgroups，进行资源限制</span></span><br><span class="line">		WithResources(c),</span><br><span class="line">		WithSysctls(c),</span><br><span class="line">		WithDevices(daemon, c),</span><br><span class="line">		WithUser(c),</span><br><span class="line">		WithRlimits(daemon, c),</span><br><span class="line">		WithNamespaces(daemon, c),	<span class="comment">//添加namespace，进行资源隔离</span></span><br><span class="line">		WithCapabilities(c),</span><br><span class="line">		WithSeccomp(daemon, c),</span><br><span class="line">		WithMounts(daemon, c),		<span class="comment">//添加挂载点</span></span><br><span class="line">		WithLibnetwork(daemon, c),</span><br><span class="line">		WithApparmor(c),</span><br><span class="line">		WithSelinux(c),</span><br><span class="line">		WithOOMScore(&amp;c.HostConfig.OomScoreAdj),</span><br><span class="line">	)</span><br></pre></td></tr></table></figure>
+<p>在 <code>WithNamespaces(daemon, c)</code>  函数中，会设置 <code>user</code> <code>network</code> <code>ipc</code> <code>pid</code>  <code>uts</code>  以及 <code>cgroup</code> ，需要主要的是 moby 项目中，<code>CLONE_NEWNS</code>即文件系统被单独在 <code>WithMounts(daemon, c)</code>  函数中设置。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithNamespaces</span><span class="params">(daemon *Daemon, c *container.Container)</span> <span class="title">coci</span>.<span class="title">SpecOpts</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(ctx context.Context, _ coci.Client, _ *containers.Container, s *coci.Spec)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		userNS := <span class="literal">false</span></span><br><span class="line">		<span class="comment">// user</span></span><br><span class="line">        <span class="comment">// network</span></span><br><span class="line">        <span class="comment">// ipc</span></span><br><span class="line">        <span class="comment">//pid</span></span><br><span class="line">        <span class="keyword">if</span> c.HostConfig.PidMode.IsContainer() &#123;</span><br><span class="line">			ns := specs.LinuxNamespace&#123;Type: <span class="string">"pid"</span>&#125;</span><br><span class="line">			pc, err := daemon.getPidContainer(c)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;</span><br><span class="line">			ns.Path = fmt.Sprintf(<span class="string">"/proc/%d/ns/pid"</span>, pc.State.GetPID())</span><br><span class="line">			setNamespace(s, ns)</span><br><span class="line">			<span class="keyword">if</span> userNS &#123;</span><br><span class="line">				<span class="comment">// to share a PID namespace, they must also share a user namespace</span></span><br><span class="line">				nsUser := specs.LinuxNamespace&#123;Type: <span class="string">"user"</span>&#125;</span><br><span class="line">				nsUser.Path = fmt.Sprintf(<span class="string">"/proc/%d/ns/user"</span>, pc.State.GetPID())</span><br><span class="line">				setNamespace(s, nsUser)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> c.HostConfig.PidMode.IsHost() &#123;</span><br><span class="line">			oci.RemoveNamespace(s, specs.LinuxNamespaceType(<span class="string">"pid"</span>))</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			ns := specs.LinuxNamespace&#123;Type: <span class="string">"pid"</span>&#125;</span><br><span class="line">			setNamespace(s, ns)</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="comment">// uts</span></span><br><span class="line">        <span class="comment">//cgroup</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Docker-容器内网络-Network"><a href="#Docker-容器内网络-Network" class="headerlink" title="Docker 容器内网络 Network"></a>Docker 容器内网络 Network</h2><p>Linux 的 namespace 主要隔离的对象有：网络设备、IPv4 和 IPv6 协议栈、路由表、防火墙、/proc/net 目录、/sys/class/net 目录、套接字（socket）等。Linux 中，物理网络设备默认放置在 root namespace 中。<br>Docker 中为实现网络的独立，又能与宿主机进行通信，为此创建 veth pair。将其中的一段放置在容器内通常，通常命名为 eth0，另外一段挂载为物理网络设备上所在的 namespace 中。实际中，docker 在 docker daemon 启动后会创建 docker0 网桥，docker 容器的网络对另一端通常绑定在 docker0 网桥。<br>现行的 docker 项目中，自 docker&gt;1.9 之后，已经将网络单独剥离为 <code>libnetwork</code>  库，自此网络模式也被抽象为同样接口。docker 现有的网络模式有五种： <code>bridge驱动</code> 、 <code>host驱动</code> 、 <code>overlay驱动</code> 、 <code>remote驱动</code> 、 <code>null驱动</code> 。<br>接下来，我们手动创建 <code>veth pair</code> ，用于模仿 docker 网桥模式。docker0（lxcbr0）网桥作为二层交换网桥，之所以在上面配置 IP，可以认为内部有一个可以用于配置 IP 信息的网卡接口。Docker 在桥接模式下，docker0 网桥用于连接容器上的默认网关而存在，并且可以保证在必要时候与宿主机进行网络隔离。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 首先，我们先增加一个网桥lxcbr0，模仿docker0</span></span><br><span class="line">brctl addbr lxcbr0</span><br><span class="line">brctl stp lxcbr0 off</span><br><span class="line">ifconfig lxcbr0 192.168.10.1/24 up <span class="comment">#为网桥设置IP地址</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 接下来，我们要创建一个network namespace - ns1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加一个namesapce 命令为 ns1 （使用ip netns add命令）</span></span><br><span class="line">ip netns add ns1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 激活namespace中的loopback，即127.0.0.1（使用ip netns exec ns1来操作ns1中的命令）</span></span><br><span class="line">ip netns <span class="built_in">exec</span> ns1   ip link <span class="built_in">set</span> dev lo up</span><br><span class="line"></span><br><span class="line"><span class="comment">## 然后，我们需要增加一对虚拟网卡</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加一个pair虚拟网卡，注意其中的veth类型，其中一个网卡要按进容器中</span></span><br><span class="line">ip link add veth-ns1 <span class="built_in">type</span> veth peer name lxcbr0.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 把 veth-ns1 按到namespace ns1中，这样容器中就会有一个新的网卡了</span></span><br><span class="line">ip link <span class="built_in">set</span> veth-ns1 netns ns1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 把容器里的 veth-ns1改名为 eth0 （容器外会冲突，容器内就不会了）</span></span><br><span class="line">ip netns <span class="built_in">exec</span> ns1  ip link <span class="built_in">set</span> dev veth-ns1 name eth0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为容器中的网卡分配一个IP地址，并激活它</span></span><br><span class="line">ip netns <span class="built_in">exec</span> ns1 ifconfig eth0 192.168.10.11/24 up</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 上面我们把veth-ns1这个网卡按到了容器中，然后我们要把lxcbr0.1添加上网桥上</span></span><br><span class="line">brctl addif lxcbr0 lxcbr0.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为容器增加一个路由规则，让容器可以访问外面的网络</span></span><br><span class="line">ip netns <span class="built_in">exec</span> ns1     ip route add default via 192.168.10.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在/etc/netns下创建network namespce名称为ns1的目录，</span></span><br><span class="line"><span class="comment"># 然后为这个namespace设置resolv.conf，这样，容器内就可以访问域名了</span></span><br><span class="line">mkdir -p /etc/netns/ns1</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"nameserver 8.8.8.8"</span> &gt; /etc/netns/ns1/resolv.conf</span><br><span class="line"></span><br><span class="line"><span class="comment">## 引自：https://coolshell.cn/articles/17029.html</span></span><br></pre></td></tr></table></figure>
+<p>详细的 Linux 的 <code>ip</code>  命令，可以参见：<a href="https://wangchujiang.com/linux-command/c/ip.html" target="_blank" rel="noopener">https://wangchujiang.com/linux-command/c/ip.html</a></p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#docker" >
+    <span class="tag-code">docker</span>
+  </a>
+
+  <a href="/tags#namespace" >
+    <span class="tag-code">namespace</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2019/09/03/yuque/Go语言的sync模块/">
+        <span class="nav-arrow">← </span>
+        
+          Go语言的sync模块
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2020/01/08/yuque/Docker基础知识--Cgroup/">
+        
+          Docker基础知识--Cgroup
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#前言"><span class="toc-nav-text">前言</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#进程"><span class="toc-nav-text">进程</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Docker-容器内进程-PID"><span class="toc-nav-text">Docker 容器内进程 PID</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Docker-容器内网络-Network"><span class="toc-nav-text">Docker 容器内网络 Network</span></a></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2019/12/18/yuque/Docker基础原理--namespace（pid与network）/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "charles";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "Docker基础原理--namespace（pid与network）",
+        owner: "charles",
+        repo: "limao693.github.io",
+        oauth: {
+          client_id: "06845d87a51ec51e16f4",
+          client_secret: "4c9110bcff722e4232de8e654b4574360acc46cd"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+<script>
+  var disqus_shortname = '';
+  
+  var disqus_url = 'http://yoursite.com/2019/12/18/yuque/Docker基础原理--namespace（pid与network）/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2021 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+    Theme by <a href="https://github.com/yanm1ng">yanm1ng</a>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+  </body>
+</html>

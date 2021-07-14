@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="私人空间">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      Kafka - - 快速入门指南 | 万物并作，吾以观复
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  <script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png">
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>万物并作，吾以观复</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>Kafka - - 快速入门指南</h2>
+  <p class="post-date">2019-02-01</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Kafka 起源于 2011 年 LikedIn 的开源项目，并不断发展。如今它是一个完整的平台，允许您冗余地存储巨大的数据量，拥有一个具有巨大吞吐量（数百万/秒）的消息总线，同时可实现实时流处理。</p>
+<p>Kafka 具备的特性有：<strong>分布式、水平扩展、高容错和日志管理</strong>。接下来将逐个介绍特性。</p>
+<h3 id="分布式"><a href="#分布式" class="headerlink" title="分布式"></a>分布式</h3><p>分布式系统的显著特点是将任务分配到多个机器处理，即组成的集群对外暴露的形式仍为单一节点。Kafka 的分布特性在于在不同节点（代理）存储、接收和发送消息。</p>
+<blockquote>
+<p>分布式系统的介绍可以参阅：<a href="https://medium.freecodecamp.org/a-thorough-introduction-to-distributed-systems-3b91562c9b3c" target="_blank" rel="noopener">A Thorough Introduction to Distributed Systems</a></p>
+</blockquote>
+<p>分布式系统的优势主要体现在：高可扩展性、容错性。</p>
+<h3 id="水平扩展"><a href="#水平扩展" class="headerlink" title="水平扩展"></a>水平扩展</h3><p>首先解释、定义垂直扩展。例如，数据库服务器过载，最直接的解决办法是添加资源（CPU、RAM 和 SSD）。垂直扩展的两大缺点是：</p>
+<ul>
+<li>现有的硬件限制了扩展能力。例如不能无线提高 CPU 核数。</li>
+<li>通常需要停机时间。</li>
+</ul>
+<p><strong>水平扩展</strong>通过投入更多的机器来解决上述问题。添加新机器不需要停机，也没有机器数量的限制。它的缺点是，并非所有系统支持水平弹性伸缩，因为在设计之初没有考虑工作在集群环境下，同时设计也更为复杂。<br><img src="https://cdn.nlark.com/yuque/0/2019/jpeg/250680/1550673729515-587ccc54-647c-4f27-a36f-08848fd77da0.jpeg#align=left&amp;display=inline&amp;height=389&amp;originHeight=389&amp;originWidth=400&amp;size=0&amp;status=done&amp;width=400" alt></p>
+<h3 id="高容错性"><a href="#高容错性" class="headerlink" title="高容错性"></a>高容错性</h3><p>非分布式系统的一大安全隐患是单点故障（single point of failure, SPOF）。例如单实例数据库宕机，会产生无法估量的损失。<br>分布式系统被设计为可配置的方式，来处理故障。例如，在 5 节点的 Kafka 集群中，即使其中两个节点关闭，系统仍然继续工作。需要注意的地方是，系统容错率与系统性能成反比，即容错率越高，性能越低。</p>
+<h3 id="日志采集"><a href="#日志采集" class="headerlink" title="日志采集"></a>日志采集</h3><p>日志采集（事务日志）仅支持附加的持久有序数据结构，即无法修改或删除已有的记录。读取顺序从左向右如图所示。<br><img src="https://cdn.nlark.com/yuque/0/2019/jpeg/250680/1550675101681-613e5d8c-b7f7-4800-8c6e-f0c7a41dae65.jpeg#align=left&amp;display=inline&amp;height=187&amp;originHeight=187&amp;originWidth=396&amp;size=0&amp;status=done&amp;width=396" alt><br>在某种程度来讲，Kafka 的数据结构就是如此简单。这也是 Kafka 的核心，因为它提供了有序数据，而有序的数据结构提供了确定性的处理方式。<br>Kafka 实际上将所有消息存储在磁盘上，并且对他们进行排序，最大化利用硬盘顺序读取速度快的优势。</p>
+<ul>
+<li>读取和写入是整数级别 O(1)（知道记录 ID），与磁盘上的其他数据结构的操作复杂度为 O(log N)相比，有巨大优势。</li>
+<li>读取和写入是分离的。写入时不会锁定读取，反之亦然（与平衡树相反）。</li>
+</ul>
+<p>这两点使得 Kafka 的性能有巨大优势，因为系统性能与数据量是分离的。Kafka 无论处理 100KB 的数据量还是 100TB 的数据量，性能都是一样的。</p>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p>向 Kafka 节点（broker）发送消息（记录）的称为程序（生产者），发送给其他程序处理消息的称为消费者。产生的消息存储在一个<strong>topic</strong>内，消费者订阅向 topic 订阅后，可以接收到对应 topic 的新消息。<br><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1550761835264-486e6737-07e1-4bbb-aae7-4e09b7888f77.png#align=left&amp;display=inline&amp;height=178&amp;name=image.png&amp;originHeight=180&amp;originWidth=258&amp;size=8295&amp;status=done&amp;width=255" alt="image.png"><br>随着 topic 变得越来越大，为保持性能和可伸缩性将 topic 拆分成更小的分区。（例如，需要存储用户的登录名，可以将用户名按照首字母进行拆分存储在不同的分区）<br>Kafka 保证分区内的所有消息都按照它们进入的顺序排序。区分特定消息的方式是通过其<strong>偏移量</strong> ，可将其视为普通数组索引，在一个分区的序列号随着新消息进入而递增。<br><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1550762596583-9e4702c2-cd98-410f-8587-2f2a17cbfaea.png#align=left&amp;display=inline&amp;height=182&amp;name=image.png&amp;originHeight=267&amp;originWidth=416&amp;size=19550&amp;status=done&amp;width=283" alt="image.png"><br>Kafka 遵循愚蠢的 broker 和聪明的消费者原则。意思是，Kafka 不会跟踪哪一条记录已经被消费者读取并删除，而是将他们按照一定的时间（例如一天）或约定某个阈值大小来存储。消费者自身从 Kafka 的 broker<strong>主动拉取</strong>新信息，并告知他们想要读取的片段。这意味着 broker 允许消费者按照自身的需要进行增加或减小偏移量，因此具有重新读取和重新处理信息的能力。<br>需要注意的是，消费者其实是消费者群组，包含一个或多个消费进程。为避免两个进程重复读取相同的信息，每个分区仅与每个组的一个消费者进程相关联。<br><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1550763797220-d9a12e85-f1df-477c-adf7-ce92ddbeb9ac.png#align=left&amp;display=inline&amp;height=331&amp;name=image.png&amp;originHeight=661&amp;originWidth=2000&amp;size=238955&amp;status=done&amp;width=1000" alt="image.png"></p>
+<h2 id="数据持久化"><a href="#数据持久化" class="headerlink" title="数据持久化"></a>数据持久化</h2><p>Kafka 将所有记录存储在磁盘，并且不会在 RAM 中保存任何记录。你可能会惊讶于以怎样高效的方式来做明智的选择。这背后有很多值得学习的优化知识：</p>
+<ol>
+<li>Kafka 有将成组的消息合并的协议。允许网络请求将消息组合在一起减少网络开销，因此服务器一次性保留大量消息，消费者一次获取巨大的线性消息块。</li>
+<li>磁盘顺序 I/O 读取速度很快。现代磁盘速度慢的原因是由于大量的磁盘寻道，但是在大型线性读写操作时不是问题。</li>
+<li>线性操作由 OS 进一步优化，通过<strong>预读取</strong>（预读取多倍数据块）和<strong>后写入</strong>（将小的逻辑写入操作合并为组后再进行物理写入操作）技术。</li>
+<li>现代 OS 利用 RAM 模拟磁盘缓存，这种技术成为 pagecache。</li>
+<li>由于 kafka 在整个流程（生产者—&gt;代理—&gt;消费者）中以未经修改的标准化二进制格式存储消息，因此它可以使用<strong>零拷贝</strong>（zero-copy）优化。操作系统将数据从 pagecache 直接复制到套接字，有效地完全绕过了 Kafka 代理应用程序。</li>
+</ol>
+<p>所有这些优化都使 Kafka 能够从接近网络的速度传输消息。</p>
+<h2 id="数据分发和复制"><a href="#数据分发和复制" class="headerlink" title="数据分发和复制"></a>数据分发和复制</h2><p>在这个章节，我们讨论 Kafka 如何实现容错以及它如何在节点之间分配数据。</p>
+<h3 id="数据复制"><a href="#数据复制" class="headerlink" title="数据复制"></a>数据复制</h3><p>分区数据在多个代理（broker）中复制，以便在其中一个代理挂掉时候，依然能够保存数据。<br>在任何时候，一个代理（broker）“拥有”其中一个分区，节点通过这个分区进行读写操作。因此，此分区被称为<strong>分区领导者</strong>（partition leader）。将接收到的数据复制给其他<strong><em>N</em></strong>个其他代理，称为<strong>跟随者</strong>（followers）。跟随者同样存储数据，并且随时准备着当 leader 挂掉时，取而代之。<br>这样的配置有助于保证任何成功发布的消息都不会丢失。通过更改复制因子，可以根据数据的重要性来交换性能以获得更强的持久性保证。<br><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1551192978691-57bdf14e-90a0-47df-8aeb-60224ba6254c.png#align=left&amp;display=inline&amp;height=765&amp;name=image.png&amp;originHeight=1531&amp;originWidth=2600&amp;size=422840&amp;status=done&amp;width=1300" alt="image.png"><br>在其中一个 leader 挂掉时，其他 follower 会竞选上岗，具体算法可以参考：<br><a href="https://community.hortonworks.com/questions/149532/how-producer-and-consumer-identify-the-leader-in-k.html" target="_blank" rel="noopener"><em>How does a producer/consumer know who the leader of a partition is?</em></a><br>作为生产者/消费者，对一个分区进行读取时，首先需要知道对应分区的 leader。这个信息需要存储在可以被访问到的地方，Kafka 使用 Zookeeper 进行存储这些元数据。</p>
+<h3 id="何为-Zookeeper"><a href="#何为-Zookeeper" class="headerlink" title="何为 Zookeeper"></a>何为 Zookeeper</h3><p>Zookeeper 是一个分布式键值存储结构。它针对读取进行了高度优化，但写入速度较慢。常应用于存储元数据和处理集群的核心机制（心跳包、分发更新配置等）。<br>它允许服务（Kafka 的 broker）的客户订阅通知，并且能在 Zookeeper 发生变动的时候发送给客户消息。这也是为什么 brokers 能够感知分区的 leader 发生变动。Zookeeper 同时也具有成熟的容错性，或者说，Kafka 很大程度上依赖 Zookeeper 的高容错性。<br>Zookeeper 用于存储所有类型的元数据，包括但不限于：</p>
+<ul>
+<li>消费者群组中每个分区的偏移量（尽管现在的客户端在单独的 Kafka 主题 Topic 内存储偏移量）</li>
+<li>ACL（访问控制列表），用于限制访问/授权</li>
+<li>生产者和消费者配额，包括每秒最大信息量</li>
+<li>存储分区 leader 和健康状态</li>
+</ul>
+<h3 id="如何区分分区的领导者"><a href="#如何区分分区的领导者" class="headerlink" title="如何区分分区的领导者"></a>如何区分分区的领导者</h3><p>在以往版本中，生产者和消费者经常直接连接并与 Zookeeper 交谈以获取此（和其他）信息。  目前 Kafka 已经弃用这种耦合，从 0.8 和 0.9 版本开始，客户端直接从 Kafka 的 brokers 那里获取元数据信息，他们自己与 Zookeeper 交谈。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1551274509585-90480e7a-f43d-4959-9703-a908c3983f5f.png#align=left&amp;display=inline&amp;height=1076&amp;name=image.png&amp;originHeight=2152&amp;originWidth=2000&amp;size=462646&amp;status=done&amp;width=1000" alt="image.png"></p>
+<h2 id="流"><a href="#流" class="headerlink" title="流"></a>流</h2><p>在 Kafka 中，流处理器是从输入的 Topic 中连续读取数据流，并对数据进行一些处理生成数据流以生成主题的任何（或外部服务、数据库、垃圾箱等）内容。<br>对于一些简单的消息，可能使用消费者或生产者的 API 接口直接处理即可，但是涉及到复杂的消息流（例如，多条数据流联合）处理的情况，Kafka 提供一个集成的<a href="https://kafka.apache.org/documentation/streams/" target="_blank" rel="noopener">Stream API</a>库。<br>此 API 应用于自己的代码块中，而不是直接在代理（broker）上运行。它与消费者 API 类似，可以帮助你在多个应用（类似多个消费者）上扩展流处理工作。</p>
+<h3 id="无状态处理"><a href="#无状态处理" class="headerlink" title="无状态处理"></a>无状态处理</h3><p>流的无状态处理是确定性的，不需要依赖任何外部的处理方式。对于任何给定的数据，将始终生成与其他内容无关的相同输入。<br><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1551280756166-0643b4f0-57aa-483b-b51f-ff4d42fc174e.png#align=left&amp;display=inline&amp;height=381&amp;name=image.png&amp;originHeight=762&amp;originWidth=2600&amp;size=233348&amp;status=done&amp;width=1300" alt="image.png"></p>
+<h3 id="流式表的双重性"><a href="#流式表的双重性" class="headerlink" title="流式表的双重性"></a>流式表的双重性</h3><p>首先要认识到流和表是相同的含义。流，可以解释为表，反之亦然。</p>
+<h3 id="流作为表"><a href="#流作为表" class="headerlink" title="流作为表"></a>流作为表</h3><p>流可以看做对数据进行一系列的更新，因此最终结果作为表进行聚合。这种技术成为事件采集（Event sourcing）。<br>如果你了解如何实现同步数据库的复制，你会知道它是通过所谓的流复制（<strong>Streaming replication</strong>），每次表格中的变动都会发送到副本服务器。事件采集的另外一个例子是，区块链分类账，它也是进行一系列变化。<br>Kafka 的数据流可以用相同的方式解释，即可以认为是积累到最终的状态的事件。此类流聚合保存在本地 RocksDB 中，称为<strong>KTable</strong>。<br><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1551281577256-6c7efae0-3e86-4379-9b28-3a6870bb826a.png#align=left&amp;display=inline&amp;height=343&amp;name=image.png&amp;originHeight=686&amp;originWidth=2000&amp;size=219233&amp;status=done&amp;width=1000" alt="image.png"></p>
+<h3 id="表作为流"><a href="#表作为流" class="headerlink" title="表作为流"></a>表作为流</h3><p>可以将表视为流中每个键的最新值的快照。  以相同的方式，流记录可以生成表，表更新可以生成更改日志流。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1551281769435-7f51d3f6-30f3-4ae8-9018-19d0ebfb11a9.png#align=left&amp;display=inline&amp;height=646&amp;name=image.png&amp;originHeight=1291&amp;originWidth=1600&amp;size=350243&amp;status=done&amp;width=800" alt="image.png"></p>
+<h3 id="有状态处理"><a href="#有状态处理" class="headerlink" title="有状态处理"></a>有状态处理</h3><p>一些简单的操作，例如<code>map()</code>或者<code>filter()</code>都是无状态的，不需要额外保存有关处理的任何数据。但是，在现实生活中，大部分操作都是有状态的（例如<code>count()</code>），因此需要保存当前积累的值。<br>假如在流处理器上维护这些状态，流处理器可能会宕机，导致状态丢失。那么应当在哪里保存状态值才能容错呢？<br>一种最简单的方式是简单地将所有状态存储在远程数据库中，并通过网络连接到该数据库。这样做的问题是，没有数据的位置和产生大量的网络交互损耗，这两者都会显着减慢您的应用程序。  一个更微妙但重要的问题是您的流处理作业的正常运行时间将紧密耦合到远程数据库，并且作业将不会自包含<em>（数据库中的数据库与另一个团队的更改可能会破坏您的处理）</em> 。<br>回忆下表和流的二元性。运行我们将流转化为与我们处理位于同一位置的表。它还能提供一种处理容错的机制，即在 Kafka 的 Broker 中存储流。<br>数据流处理器能够在本地表（即，RocksDB）存储状态，该表将从输入流（可能实在某些任意变换之后）更新。当进程失败时，可以通过重新请求流来恢复其数据。<br>你也可以使用一个远程数据库作为流的生产者，用于在本地重建表进行高效的广播更改日志。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1551282823033-1e7dcc9e-c2a2-4130-b972-b1c1776bd0f1.png#align=left&amp;display=inline&amp;height=729&amp;name=image.png&amp;originHeight=1458&amp;originWidth=2000&amp;size=234952&amp;status=done&amp;width=1000" alt="image.png"></p>
+<h2 id="KSQL"><a href="#KSQL" class="headerlink" title="KSQL"></a>KSQL</h2><p>通常，使用 Kafka 只能使用 JVM 语言编写刘处理，因为这是 Kafka 唯一的官方 Streams API 客户端。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1551799835544-909daa5c-d2ad-4f30-9060-496ba185feaf.png#align=left&amp;display=inline&amp;height=772&amp;name=image.png&amp;originHeight=1543&amp;originWidth=1600&amp;size=165449&amp;status=done&amp;width=800" alt="image.png"><br>2018.04 的 Kafka 发布<strong>KSQL</strong>，一种可以使用类 SQL 语言来编写简单流媒体工作的工具。<br>通过设置 KSQL 服务器，并且通过 CLI 方式进行交互以此来管理处理。它使用相同的抽象（KStream 和 KTable），保证了 StreamS API 的相同有点（可伸缩性、容错性）和更加简便的方式处理工作流。<br>这个特性虽然不被人经常提起，但经过实践对于测试更有用，甚至运行开发之外的人（例如，产品所有者）使用流处理。</p>
+<h3 id="流的可选择性"><a href="#流的可选择性" class="headerlink" title="流的可选择性"></a>流的可选择性</h3><p>Kafka 的流兼具了力量和简约的完美结合。可是说是市场上处理流工作的最佳工具，与其他流处理工具（Storm、Samza、Spark 和 Wallaroo）相比，Kafka 更容易与其他工具结合。<br>大多数其他流处理的框架的问题在于它们运行和部署的复杂性。例如 Spark 这样的处理框架需要以下几点：</p>
+<ol>
+<li>在一组计算机上控制大量的作业，并在集群上有效的分配。</li>
+<li>为此，必须动态打包你的程序并将其部署在它需要执行的节点（以及配置、库等）。</li>
+</ol>
+<p>为此，要处理以上问题，使得框架尤为复杂。它们需要控制很多方面：部署、配置、监控和打包。<br>Kafka 流能够允许你在你需要时，提出自己的部署策略，例如 Kubernetes、Mesos、Nomad、Docker Swarm 或者其他方式。<br>Kafka Streams 的基本目的是使所有应用程序能够进行流处理，而无需运行和维护另一个操作复杂的集群。  唯一潜在的缺点是它与卡夫卡紧密结合，但在现代世界中，大多数（如果不是全部）实时处理由卡夫卡提供动力可能不是一个很大的劣势。</p>
+<h2 id="何时启用-Kafka"><a href="#何时启用-Kafka" class="headerlink" title="何时启用 Kafka"></a>何时启用 Kafka</h2><p>正如我们已经介绍的，Kafka 允许通过集中式介质获取大量消息并且存储他们，并不担心性能或数据丢失等问题。<br>这意味着非常适合用在系统框架的核心，充当连接不同程序的中间媒介。Kafka 能够成为事件驱动架构的中心部分，是您能够真正的将应用程序间解耦。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2019/png/250680/1551888348371-8ade2e7b-bab2-4c43-9172-231a08b074c0.png#align=left&amp;display=inline&amp;height=337&amp;name=image.png&amp;originHeight=674&amp;originWidth=900&amp;size=432210&amp;status=done&amp;width=450" alt="image.png"><br>Kafka 能够非常轻松的分离不同（微）服务之间的通信。使用 Streams API，现在可以更容易的编写业务逻辑，从而丰富 Kafka 主题数据以便提供服务。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Apache Kafka 作为分布式流平台，每天可以处理数以万亿计的事件。Kafka 提供低延迟、高吞吐量、高容错和订阅式流水线，同时能够流式处理事件。<br>我们回顾了它的基本语义（生产者、代理、消费者和 Topic），了解了它的一些优化（page cache），通过复制数据了解了它的容错能力，并且介绍了它不断增长的强大流功能。</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#珠峰翻译计划" >
+    <span class="tag-code">珠峰翻译计划</span>
+  </a>
+
+  <a href="/tags#Kafka" >
+    <span class="tag-code">Kafka</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2019/01/28/yuque/测试语雀-Travis-Hexo/">
+        <span class="nav-arrow">← </span>
+        
+          测试语雀-Travis-Hexo
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2019/03/03/yuque/usb接口键盘转PS2接口/">
+        
+          usb接口键盘转PS2接口
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#简介"><span class="toc-nav-text">简介</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#分布式"><span class="toc-nav-text">分布式</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#水平扩展"><span class="toc-nav-text">水平扩展</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#高容错性"><span class="toc-nav-text">高容错性</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#日志采集"><span class="toc-nav-text">日志采集</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#工作原理"><span class="toc-nav-text">工作原理</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#数据持久化"><span class="toc-nav-text">数据持久化</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#数据分发和复制"><span class="toc-nav-text">数据分发和复制</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#数据复制"><span class="toc-nav-text">数据复制</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#何为-Zookeeper"><span class="toc-nav-text">何为 Zookeeper</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#如何区分分区的领导者"><span class="toc-nav-text">如何区分分区的领导者</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#流"><span class="toc-nav-text">流</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#无状态处理"><span class="toc-nav-text">无状态处理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#流式表的双重性"><span class="toc-nav-text">流式表的双重性</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#流作为表"><span class="toc-nav-text">流作为表</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#表作为流"><span class="toc-nav-text">表作为流</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#有状态处理"><span class="toc-nav-text">有状态处理</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#KSQL"><span class="toc-nav-text">KSQL</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#流的可选择性"><span class="toc-nav-text">流的可选择性</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#何时启用-Kafka"><span class="toc-nav-text">何时启用 Kafka</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#总结"><span class="toc-nav-text">总结</span></a></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2019/02/01/yuque/Kafka - - 快速入门指南/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "charles";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "Kafka - - 快速入门指南",
+        owner: "charles",
+        repo: "limao693.github.io",
+        oauth: {
+          client_id: "06845d87a51ec51e16f4",
+          client_secret: "4c9110bcff722e4232de8e654b4574360acc46cd"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+<script>
+  var disqus_shortname = '';
+  
+  var disqus_url = 'http://yoursite.com/2019/02/01/yuque/Kafka - - 快速入门指南/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2021 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+    Theme by <a href="https://github.com/yanm1ng">yanm1ng</a>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+  </body>
+</html>
