@@ -33,6 +33,6 @@
     "dev": "hexo clean && hexo server"
   },
   "devDependencies": {
-    "yuque-hexo": "^1.8.0"
+    "yuque-hexo": "^1.7.0"
   }
 }
